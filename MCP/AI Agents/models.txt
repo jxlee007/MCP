@@ -1,0 +1,31 @@
+Here is a table of specific Ollama models that support tool use/function calling, their size/type, and their compatibility with your Intel i3-6006U and ~6–8GB available RAM. These models are efficient and suitable for n8n workflows on your hardware.
+
+| Model Name (Ollama Command)         | Size/Type        | Tool Use/Function Calling | Compatibility for Your Use | Comments                                             |
+|-------------------------------------|------------------|--------------------------|---------------------------|------------------------------------------------------|
+| ollama pull llama3:8b-instruct-q4_0 | 8B, Quantized    | Yes                      | Usable, but slow          | Latest Llama 3, supports tools, stable on 8GB+ RAM   |
+| ollama pull mistral:7b-instruct-q4_0| 7B, Quantized    | Yes                      | Best fit                  | Very efficient, good for low-end CPUs                |
+| ollama pull phi:4-mini-q4_0         | 4B, Quantized    | Yes                      | Excellent                 | Very light, new tool support, fast on low RAM        |
+| ollama pull gemma:7b-instruct-q4_0  | 7B, Quantized    | Yes                      | Good                      | Efficient Google model, tool support                 |
+| ollama pull granite:8b-q4_0         | 8B, Quantized    | Yes                      | Usable, but slow          | IBM Granite, designed for tool/RAG use               |
+| ollama pull qwen:7b-instruct-q4_0   | 7B, Quantized    | Yes                      | Good                      | Alibaba Qwen, efficient, tool support                |
+
+**Notes:**
+- "Quantized" (q4_0) models use less RAM and are faster on CPUs.
+- All listed models officially support tool use/function calling in Ollama[1][2][4][7].
+- For best performance, prefer the smallest models (Phi-4-mini, Mistral 7B).
+- Avoid running larger models or non-quantized versions due to RAM/CPU limits.
+
+Let me know if you want more details about any specific model or setup help for n8n!
+
+Citations:
+[1] https://ollama.com/library
+[2] https://ollama.com/search?c=tools
+[3] https://github.com/Aider-AI/aider/issues/3081
+[4] https://github.com/ollama/ollama/releases
+[5] https://pieces.app/blog/new-models-release
+[6] https://techcommunity.microsoft.com/blog/azuredevcommunityblog/bring-your-own-models-on-ai-toolkit---using-ollama-and-api-keys/4369411
+[7] https://ollama.com/blog/tool-support
+[8] https://dev.to/nikl/top-10-ai-models-every-developer-should-know-in-2025-30f8
+
+---
+Answer from Perplexity: pplx.ai/share

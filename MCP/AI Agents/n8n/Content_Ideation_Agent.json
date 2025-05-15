@@ -1,0 +1,249 @@
+{
+  "name": "Content: Ideation Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are to list problems inside of your business or your competitors' businesses that you would love to have solved via an automation or an AI agent to manage these tasks.",
+        "options": {
+          "systemMessage": "You are an online business owner in a service based business who is looking to use AI inside of your business. You frequently view YouTube for leisure and for solving issues in your business. You like being ahead of the curve and enjoy learning new technologies."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        280,
+        0
+      ],
+      "id": "0e1794aa-d19b-4073-925d-4dabcf5199f4",
+      "name": "Problems"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        220
+      ],
+      "id": "c38e653e-b185-4c1d-ba96-d38d9952afa7",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You should use the following list of pain points combined with your expertise to list solutions to the following pain points. These solutions should be ideas for YouTube videos. These videos should be all long form content but can vary in terms of tutorials, white board (conceptual), trending topics, SEO optimized, etc... *Do not repeat exact video ideas*\n\nMake sure to focus on the following topic: \n\nThese are the pain points:\n{{ $json.output }}",
+        "options": {
+          "systemMessage": "You are an expert AI Automation Agency owner, you have scaled your own agency to $1 million a month just via YouTube and have helped other AI Automation Agency owners do the same also with YouTube. "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        700,
+        0
+      ],
+      "id": "c89706ec-dab9-4f1f-85db-c1dfc021ea4e",
+      "name": "Ideas"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        20,
+        0
+      ],
+      "id": "9b743f40-2bcb-4eee-9bfc-48d936677f0f",
+      "name": "Telegram Trigger",
+      "webhookId": "12071913-38d4-4dd7-b6a0-be33ed51809d",
+      "credentials": {
+        "telegramApi": {
+          "id": "QT1TafR4xHGlKkkF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        220
+      ],
+      "id": "014b9cd0-aef1-4173-8616-ddd34711815a",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## How to Set Up this Workflow\n### Connecting Telegram\n- [ ] create a Telegram account (if you do not have one)\n- [ ] create a bot, check out my video if you need help!\n- [ ] connect your telegram account to n8n\n### Connecting OpenAI\n- [ ] generate an API key on OpenAI's website\n- [ ] connect OpenAI to n8n\n### Adjusting Workflow\n- [ ] adjust the \"Problems\" Agent prompt (text) field and system message to act as target audience / ideal client / ideal customer\n- [ ] adjust the \"Ideas\" Agent prompt (text) field and system message to act as an expert in your industry",
+        "height": 400,
+        "width": 580,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        340,
+        -540
+      ],
+      "typeVersion": 1,
+      "id": "1cdfe5b6-3036-4706-9f6c-7230dfd8ff97",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1060,
+        0
+      ],
+      "id": "fd8a3f59-c19c-4415-843e-127cc8f07458",
+      "name": "Telegram",
+      "webhookId": "08b66ff2-4bdd-4617-9bfb-7ca216926ecb",
+      "credentials": {
+        "telegramApi": {
+          "id": "QT1TafR4xHGlKkkF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Problems Agent\n- Generates problems of your ideal clients / customers",
+        "height": 220,
+        "width": 320,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        240,
+        -100
+      ],
+      "typeVersion": 1,
+      "id": "f5406da8-7d0b-4743-affe-9b9f98bc9b53",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "### Ideas Agent\n- Solves the pain points as if it is an expert in your field",
+        "height": 220,
+        "width": 320,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        680,
+        -100
+      ],
+      "typeVersion": 1,
+      "id": "c698cad6-1ecc-4e2e-8971-8b5b4b838f65",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Problems": {
+      "main": [
+        [
+          {
+            "node": "Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ideas",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Problems",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Problems",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ideas": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5f6457a1-42f7-4ee7-9995-2d92b6a8df63",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "16629a77b4219fe54201636e06c0d2eb72b1bdad86870b51670c815092d7bb05"
+  },
+  "id": "FjmyftBj8ECuKwo6",
+  "tags": []
+}

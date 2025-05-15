@@ -1,0 +1,236 @@
+{
+  "name": "Voice RAG Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "86eb2547-e39b-411a-9a88-7cf784b5d5ff",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6e2e6347-3cab-4b7d-b2a3-1b1fb5d9adac",
+      "name": "Webhook",
+      "webhookId": "86eb2547-e39b-411a-9a88-7cf784b5d5ff"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You have access to the following tools...\n- vector index containing information about the airbnb location\n\nThe guest wants to know...\n{{ $json.body.question }}",
+        "options": {
+          "systemMessage": "You are an assistant helping an airbnb guest, and contributing to them having a positive stay"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "c69ef32b-c80d-4592-9c42-b8ac82019509",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        220
+      ],
+      "id": "054f9854-0f04-40cd-a7f4-20aa32805809",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        0
+      ],
+      "id": "80e8bf08-de52-4259-97f6-c9e8845f8ac6",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "airbnb_info_store",
+        "toolDescription": "Find information about an airbnb home",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "videxample",
+          "mode": "list",
+          "cachedResultName": "videxample"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        420,
+        220
+      ],
+      "id": "98634a68-6828-4c96-bb84-78e4340e97c1",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "WbT0Us1UFOtXBJWK",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        360
+      ],
+      "id": "5a90bd74-0c73-46cb-8ffe-d0534da5938d",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Overview\n* Uses ElevenLabs agent to query n8n AI Agent\n* Still prompted n8n agent\n     * (Below is a simple RAG example)",
+        "width": 280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -60,
+        -360
+      ],
+      "typeVersion": 1,
+      "id": "86d9335a-2903-49ac-80f4-15c262f12166",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### Setup Guide\n- [ ] Create an account on ElevenLabs\n- [ ] Create AI Agent inside of ElevenLabs\n- [ ] Edit Agent prompt below\n- [ ] Connect OpenAI account\n- [ ] Create Pinecone account\n- [ ] Create Pinecone index\n- [ ] Create workflow to add documents to Pinecone index",
+        "height": 300,
+        "width": 260
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        260,
+        -360
+      ],
+      "typeVersion": 1,
+      "id": "2516fd74-45f4-400e-8a14-84bcd74e97bd",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "### 🔗 Links\n* [ElevenLabs](https://elevenlabs.io/)\n* [OpenAI API](https://platform.openai.com/)\n* [Pinecone](https://www.pinecone.io/)",
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        -360
+      ],
+      "typeVersion": 1,
+      "id": "64da55c6-9896-497e-8c28-3dabccecdca8",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "651c8e6a-64ad-42f3-94e5-c46dd02d1e3f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "16629a77b4219fe54201636e06c0d2eb72b1bdad86870b51670c815092d7bb05"
+  },
+  "id": "5lHp2Pc7jOYKvtsU",
+  "tags": []
+}

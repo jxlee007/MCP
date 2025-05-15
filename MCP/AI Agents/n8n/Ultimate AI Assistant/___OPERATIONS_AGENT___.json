@@ -1,0 +1,469 @@
+{
+  "name": "___OPERATIONS AGENT___",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "53c9e9fa-f77f-41cc-aab5-f179b8bc1ac0",
+      "name": "Telegram Trigger",
+      "webhookId": "50bf8ad6-eedd-4a4b-a572-4a402a15c66f",
+      "credentials": {
+        "telegramApi": {
+          "id": "QT1TafR4xHGlKkkF",
+          "name": "Telegram account - Personal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are to help the owner of the eCommerce store with the following request: {{ $json.message.text }}\n\n\nYou have access to the following tools and agents:\n- Email_Management_Agent: manages email related tasks\n- Calendar_Management_Agent: calendar related tasks\n- CRM_Management_Agent: CRM related tasks\n- Inventory_Management_Agent: inventory related tasks\n- Research_Management_Agent: calendar related tasks\n  - gets and returns info on a specified topic\n- Calculator\n  - just in case you need it\n\nKeep in mind that the agents you are calling do not have the memory that you do, so your job is to prompt the agents you are using with your logic, memory, and the user's message to ensure each agent has enough information to complete their task. In other words each agents \"taskToExecute\" should be a clear set of instructions leaving no room for error.\n\n\nToday's date is {{ $now }}\n\nAlways respond in less than 3,000 characters, otherwise your boss will not receive the message.",
+        "options": {
+          "systemMessage": "You are a personal assistant for the owner of an eCommerce store that sells technology."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "5d1ae2ce-e6c8-4992-aac3-e458c1b508c2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -60,
+        240
+      ],
+      "id": "fb32f73b-32b6-41c6-b511-9ae7d107135f",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        100,
+        240
+      ],
+      "id": "d2ce4b16-9662-4059-a15d-1b843179997e",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        760,
+        240
+      ],
+      "id": "36d870aa-89d4-4f12-9c78-7ca5b87c406c",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "name": "Email_Management_Agent",
+        "description": "Call this tool to execute any tasks regarding email",
+        "workflowId": {
+          "__rl": true,
+          "value": "4HuFaNw3yIhuK16m",
+          "mode": "list",
+          "cachedResultName": "OPERATIONS: Email Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "taskToExecute": "={{ $fromAI(\"taskToExecute\") }}"
+          },
+          "matchingColumns": [
+            "taskToExecute"
+          ],
+          "schema": [
+            {
+              "id": "taskToExecute",
+              "displayName": "taskToExecute",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        660,
+        240
+      ],
+      "id": "546bbca0-13b9-4aa9-b288-940a6cba8e17",
+      "name": "Email"
+    },
+    {
+      "parameters": {
+        "name": "Calendar_Management_Agent",
+        "description": "Call this tool to execute any tasks regarding calendar",
+        "workflowId": {
+          "__rl": true,
+          "value": "k68zsDZWzOX3Irvg",
+          "mode": "list",
+          "cachedResultName": "OPERATIONS: Calendar Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "taskToExecute": "={{ $fromAI(\"taskToExecute\") }}"
+          },
+          "matchingColumns": [
+            "taskToExecute"
+          ],
+          "schema": [
+            {
+              "id": "taskToExecute",
+              "displayName": "taskToExecute",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        560,
+        240
+      ],
+      "id": "3b9816be-e6af-4684-8706-bf52509108b5",
+      "name": "Calendar"
+    },
+    {
+      "parameters": {
+        "name": "CRM_Management_Agent",
+        "description": "Call this tool to execute any tasks regarding CRM",
+        "workflowId": {
+          "__rl": true,
+          "value": "QTtHFkQGKctmHk1T",
+          "mode": "list",
+          "cachedResultName": "OPERATIONS: CRM Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "taskForExecution": "={{ $fromAI(\"taskToExecute\") }}"
+          },
+          "matchingColumns": [
+            "taskToExecute"
+          ],
+          "schema": [
+            {
+              "id": "taskForExecution",
+              "displayName": "taskForExecution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        460,
+        240
+      ],
+      "id": "da2cb132-48b9-4323-b538-0f68748ff19f",
+      "name": "CRM"
+    },
+    {
+      "parameters": {
+        "name": "Inventory_Management_Agent",
+        "description": "Call this tool to execute any tasks regarding inventory",
+        "workflowId": {
+          "__rl": true,
+          "value": "ipQJq2KR9WvK77N6",
+          "mode": "list",
+          "cachedResultName": "OPERATIONS: Inventory Management"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "taskForExecution": "={{ $fromAI(\"taskToExecute\") }}"
+          },
+          "matchingColumns": [
+            "taskForExecution"
+          ],
+          "schema": [
+            {
+              "id": "taskForExecution",
+              "displayName": "taskForExecution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        360,
+        240
+      ],
+      "id": "dde5916b-42fa-48d1-8d54-793ad3b79984",
+      "name": "Inventory"
+    },
+    {
+      "parameters": {
+        "name": "Research_Management_Agent",
+        "description": "Call this tool to conduct research",
+        "workflowId": {
+          "__rl": true,
+          "value": "OnQhSRENxMnBgxuF",
+          "mode": "list",
+          "cachedResultName": "OPERATIONS: Research Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "infoForResearch": "={{ $fromAI(\"topicToResearch\") }}"
+          },
+          "matchingColumns": [
+            "taskForExecution"
+          ],
+          "schema": [
+            {
+              "id": "infoForResearch",
+              "displayName": "infoForResearch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        260,
+        240
+      ],
+      "id": "d074e396-8042-4f4c-b671-bb80c6b0ea23",
+      "name": "Research"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        580,
+        0
+      ],
+      "id": "0b539b64-af79-4909-b951-55525574c193",
+      "name": "Telegram",
+      "webhookId": "3c7d03c4-2016-42b1-854e-72dd96997b99",
+      "credentials": {
+        "telegramApi": {
+          "id": "QT1TafR4xHGlKkkF",
+          "name": "Telegram account - Personal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Setup Guide\n- [ ] Create Telegram account\n- [ ] Create bot in Telegram\n- [ ] Connect bot to n8n trigger\n- [ ] Connect OpenAI API for the chat model\n- [ ] Edit agent prompt (optional)\n- [ ] Select your workflows in each of the 5 tools",
+        "height": 300,
+        "width": 380
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        180,
+        -340
+      ],
+      "typeVersion": 1,
+      "id": "d591ae71-53eb-47af-9352-761a35a1cc86",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CRM": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inventory": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "239dbfc5-7545-4217-a00d-1453f5090125",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "16629a77b4219fe54201636e06c0d2eb72b1bdad86870b51670c815092d7bb05"
+  },
+  "id": "irq0mesiv30xfkIv",
+  "tags": []
+}
