@@ -1,0 +1,297 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        7820,
+        500
+      ],
+      "id": "72d11396-5acd-4afe-902f-94d5e9939eb0",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the error from the data being passed in\nconst errorMessage = $json.error || 'Unknown error';\n\n// Get session ID from current node or fall back to unknown\nconst sessionId = $json.session_id || 'unknown';\n\n// Try to get original request information from previous nodes\nlet originalPrompt = $('When chat message received').first().json.chatInput || 'unknown';\n// try {\n//   // Try to get the original text from the chat trigger node\n//   const chatMessage = $('When chat message received').first().json.chatInput;\n//   if (chatMessage && chatMessage.json && chatMessage.json.text) {\n//     originalPrompt = chatMessage.json.text;\n//   }\n// } catch (err) {\n//   console.log('Could not retrieve original text:', err.message);\n// }\n\n// Log what we have for debugging\nconsole.log('Error message:', errorMessage);\nconsole.log('Session ID:', sessionId);\nconsole.log('Original prompt:', originalPrompt);\n\n// Return the formatted message\nreturn [{\n  json: {\n    errorMessage: errorMessage,\n    sessionId: sessionId\n  }\n}];"
+      },
+      "id": "78278bd4-28cb-443d-a604-349e7b47a3d4",
+      "name": "Prepare Error Feedback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8800,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "workflowObject": "={{$json.toJsonString()}}",
+        "requestOptions": {}
+      },
+      "id": "ff06891e-4268-4d82-b3e5-290f8b69fa77",
+      "name": "n8n",
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        8820,
+        480
+      ],
+      "credentials": {
+        "n8nApi": {
+          "id": "d991CW4UIbPgYOrb",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "10aed1a1-746c-44df-9106-ecd9b67fa987",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": "=true",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "aeaca10a-354b-4828-8dc9-974a8c5b8526",
+      "name": "If Valid JSON",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        8600,
+        500
+      ],
+      "notesInFlow": true,
+      "notes": "Send the specific error and session id of the chat so that the I agent could have the context and rectify the error in the Json flow"
+    },
+    {
+      "parameters": {
+        "sessionKey": "sessionId",
+        "contextWindowLength": 10
+      },
+      "id": "35f419ec-45bf-4e86-8746-6e647f618d72",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        8200,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "cognitivecomputations/dolphin3.0-r1-mistral-24b:free",
+          "mode": "list",
+          "cachedResultName": "cognitivecomputations/dolphin3.0-r1-mistral-24b:free"
+        },
+        "options": {}
+      },
+      "id": "c2f66ee3-fd67-45b6-a0a3-6aeb02294f36",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        8020,
+        740
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "eRfGfAkOlAY1n2tL",
+          "name": "Openrouter via OpenAi ACC "
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "aff64742-1c57-4131-953a-2cdc7611d0be",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        7600,
+        500
+      ],
+      "webhookId": "10a2ebbe-bed4-40b8-88fa-b3ae8c036749"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=New Request:\nIf this is the first input chat from the user, please generate a complete n8n workflow JSON from scratch based on the user's requirements. Here are the user requirements: To {{ $json.data[0].chatInput }}\n\nError Correction:\nAlternatively, if the data indicates that there's a specific error in the previously generated workflow, then use the provided session ID context to locate the earlier result, rectify the error, and improve the workflow accordingly.Here is the session id {{ $json.data[0].sessionId }} and this is the specific error {{ $json.data[0].errorMessage }} in generated workflow. \n\nPlease analyze the input data and determine whether to generate a new workflow or correct the existing one. In either case, ensure that the final output is a complete, import-ready n8n workflow JSON enclosed in a ```json code block without extra commentary outside of it.\n\nThank you!",
+        "options": {
+          "systemMessage": "=You are a professional n8n Workflow Creator.\n\nYour job is to generate complete, import-ready n8n workflow JSONs based on user input. Prioritize decisive action and intelligent assumptions. Do not delay by asking unnecessary clarifying questions — only pause if the request is too vague to proceed.\n\nYou have access to:\n- The full n8n Cheat Sheet Guide with node structures, tool configurations, and integration best practices\n\nBuild workflows confidently using the most likely logic unless told otherwise.\n\nWorkflow Requirements:\n- All nodes must include `id`, `name`, `type`, `typeVersion`, `position`, `parameters`, and be linked via `connections`\n- Use expressions like `{{$node[\"NodeName\"].json[\"field\"]}}` to pass data between nodes\n- Avoid placeholders like `\"API_KEY_HERE\"` — use `{{ myCredentials }}`\n- Include `try/catch` in Function or Code nodes\n- Output only the full JSON inside a ```json code block — no extra commentary, screenshots, or Markdown outside the block\n\nIf the use case clearly involves AI reasoning, include an AI Agent node using:\n- `@n8n/n8n-nodes-langchain.agent`\n- `model`: `chatgpt-4o-latest` (fallback: `o1-mini`)\n- `promptType`: `\"define\"`\n- `responseFormat`: `\"json_object\"` for structured replies\n- Add memory and tool nodes where applicable\n\nIf the use case involves automation (e.g., MCP, Airtable, HTTP, Notion), structure the logic with appropriate trigger and integration nodes. Use examples from your internal references to shape node structure and configuration.\n\nOnly ask the user follow-up questions when you cannot make a reasonable assumption.\n\nBe bold. Be accurate. Build workflows.\n\nOnce you generate the complete workflow JSON, return it as the final output so it can be validated by the next node. Do not hold it internally or summarize it — return the full JSON inside a single ```json code block.\n\n"
+        }
+      },
+      "id": "4ed247e7-0b4e-4a3f-86ab-18acb87e7af2",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        8020,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📌 This workflow allows users to submit a workflow request to automatically generate it in their n8n instance. ",
+        "height": 260,
+        "width": 380,
+        "color": 3
+      },
+      "id": "9f11e7a2-d8aa-4398-b446-0d5e5f6c110e",
+      "name": "Sticky Note - Documentation",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7160,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.output || $json.message || $json.text;\nconst sessionId = $('When chat message received').first().json.sessionId || $json.sessionId || 'unknown';\n\nif (!raw) {\n  throw new Error(\"Missing AI output text.\");\n}\n\nconst match = raw.match(/```json\\s*([\\s\\S]*?)```/);\nif (!match) {\n  throw new Error(\"No ```json code block found.\");\n}\n\nconst jsonString = match[1].trim();\n\ntry {\n  const parsed = JSON.parse(jsonString);\n  \n  // Add isValid property inside the json object\n  return [{ json: { ...parsed, isValid: true } }];\n} catch (err) {\n  // Return error but don't fail the workflow\n  return [{ json: { error: err.message, isValid: false, session_id: sessionId } }];\n}\n"
+      },
+      "id": "bbe215e6-d5b5-4ca7-9da2-e2d6253ab038",
+      "name": "Validate JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8380,
+        500
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prepare Error Feedback": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Valid JSON": {
+      "main": [
+        [
+          {
+            "node": "n8n",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Error Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Validate JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate JSON": {
+      "main": [
+        [
+          {
+            "node": "If Valid JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "526e902f-f442-49e3-afc8-e1c58f1fabd6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e71f44c62189a9b063f374bd2a16553a7273ad0e298c1c01483fe021ec06e9a"
+  },
+  "id": "kGOWK9Xy2yJAtrro",
+  "tags": []
+}

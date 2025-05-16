@@ -1,0 +1,32 @@
+# version: '3'
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_DATABASE_TYPE=postgres
+      - N8N_DATABASE_HOST=postgres
+      - N8N_DATABASE_NAME=n8n
+      - N8N_DATABASE_USER=postgres
+      - N8N_DATABASE_PASSWORD=your_secure_password
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_INSTALLER_ALLOW_COMMUNITY_NODES=true
+      - N8N_EDITOR_BASE_URL=https://uniformly-outgoing-kiwi.ngrok-free.app
+      - WEBHOOK_URL=https://uniformly-outgoing-kiwi.ngrok-free.app
+      - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
+    ports:
+      - "5678:5678"
+    volumes:
+      - "D:/MCP/n8n-data/n8n:/home/node/.n8n"  # Updated path
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_PASSWORD=your_secure_password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=n8n
+    volumes:
+      - "D:/MCP/n8n-data/postgres:/var/lib/postgresql/data"  # Updated path
