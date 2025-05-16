@@ -1,0 +1,301 @@
+{
+  "name": "OPERATIONS: Email Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are to do the following task:\n{{ $json.taskToExecute }}\n\nYou have access to the following tools:\n- send an email\n- get emails\n- delete an email\n- mark an email as opened\n\nToday's date is {{ $now }}\n\nWhen sending emails, please format them in HTML and include a signature \"Garrett's AI Assistant\"",
+        "options": {
+          "systemMessage": "You are a helpful email assistant, in charge of managing my emails."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "2c0afebe-3064-4ae4-a9c5-63b134bc6e6c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        60,
+        260
+      ],
+      "id": "0c54d0ca-13de-4f16-ab5f-5c2949a9df3c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "1"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        220,
+        260
+      ],
+      "id": "521b2302-d83b-46b3-bd1e-3df1777c6f01",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "send an email",
+        "sendTo": "={{ $fromAI(\"emailToSendTo\") }}",
+        "subject": "={{ $fromAI(\"subjectOfEmail\") }}",
+        "message": "={{ $fromAI(\"bodyOfTheEmail\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        820,
+        260
+      ],
+      "id": "db09ea1a-4a85-407f-82e1-d480567b45b5",
+      "name": "Send Email",
+      "webhookId": "3dde2de4-7d6f-4ecc-b565-66431badd349",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "x6PHlkZLiRHvC38L",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "get emails",
+        "operation": "getAll",
+        "filters": {
+          "q": "={{ $fromAI(\"searchCriteria\") }}",
+          "receivedAfter": "={{ $fromAI(\"recievedAfterDate\") }}",
+          "receivedBefore": "={{ $fromAI(\"recievedBeforeDate\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        700,
+        260
+      ],
+      "id": "01660ed9-106e-41ce-8653-47601720d19e",
+      "name": "Get Emails",
+      "webhookId": "2da6044c-6c56-40d3-98f3-d62b81343d24",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "x6PHlkZLiRHvC38L",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "delete an email",
+        "operation": "delete",
+        "messageId": "={{ $fromAI(\"MessageIdOfEmailToDelete\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        580,
+        260
+      ],
+      "id": "00da9837-cf94-46bc-a7c8-b8948d6052b7",
+      "name": "Delete Email",
+      "webhookId": "17d796bd-4c92-460e-bff5-1a4d955b8454",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "x6PHlkZLiRHvC38L",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "mark an email as opened",
+        "operation": "markAsRead",
+        "messageId": "={{ $fromAI(\"messageIdOfReadEmail\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        260
+      ],
+      "id": "63386cac-59d6-4c67-849b-727ac71ff121",
+      "name": "Mark as Read",
+      "webhookId": "494c4444-f14c-417e-b168-e9373e012bdf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "x6PHlkZLiRHvC38L",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "taskToExecute"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1d10a606-25ec-4d40-ac07-71d39f31e702",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "content": "### Setup Guide\n- [ ] Edit agent prompt (optional)\n- [ ] Connect Gmail account\n- [ ] Add other Gmail tools (optional)\n- [ ] Adjust prompt if you add more tools!",
+        "height": 220,
+        "width": 280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        200,
+        -280
+      ],
+      "typeVersion": 1,
+      "id": "82e47c21-e749-4e44-9a5e-754c4603aa23",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Read": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "02ffa895-8ab4-46ff-bbb1-fb1cd3a06215",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "16629a77b4219fe54201636e06c0d2eb72b1bdad86870b51670c815092d7bb05"
+  },
+  "id": "4HuFaNw3yIhuK16m",
+  "tags": [
+    {
+      "createdAt": "2025-02-24T17:35:31.956Z",
+      "updatedAt": "2025-02-24T17:35:31.956Z",
+      "id": "LUlHRn4uduCT2tfj",
+      "name": "Videos"
+    },
+    {
+      "createdAt": "2025-02-24T17:36:13.173Z",
+      "updatedAt": "2025-02-24T17:36:13.173Z",
+      "id": "yBKXD48DsV8n6td0",
+      "name": "Operations Agent"
+    }
+  ]
+}

@@ -1,0 +1,358 @@
+{
+  "name": "OPERATIONS: CRM Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        760
+      ],
+      "id": "69716883-0c1e-4663-9c23-716859c44206",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=1"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        760
+      ],
+      "id": "0992dbef-f594-4d1e-aeba-d48bc65aafa0",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "call this tool to get contact(s)",
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "1aa75af7-247e-8009-8e0e-ea1bb0905d2e",
+          "mode": "list",
+          "cachedResultName": "Vid CRM",
+          "cachedResultUrl": "https://www.notion.so/1aa75af7247e80098e0eea1bb0905d2e"
+        },
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Email|email",
+              "condition": "equals",
+              "emailValue": "={{ $fromAI(\"emailOfContact\") }}"
+            },
+            {
+              "key": "Lead Status|status",
+              "condition": "equals",
+              "statusValue": "={{ $fromAI(\"statusOfContact\") }}"
+            },
+            {
+              "key": "Notes|rich_text",
+              "condition": "contains",
+              "richTextValue": "={{ $fromAI(\"notesForContact\") }}"
+            },
+            {
+              "key": "Phone|phone_number",
+              "condition": "equals",
+              "phoneNumberValue": "={{ $fromAI(\"phoneOfContact\") }}"
+            },
+            {
+              "key": "Website|url",
+              "condition": "contains",
+              "urlValue": "={{ $fromAI(\"websiteOfContact\") }}"
+            },
+            {
+              "key": "Name|title",
+              "condition": "contains",
+              "titleValue": "={{ $fromAI(\"contactName\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notionTool",
+      "typeVersion": 2.2,
+      "position": [
+        520,
+        760
+      ],
+      "id": "5fe272a0-8c5c-47d2-bb2d-ccd53a4dbb55",
+      "name": "Get Contact",
+      "credentials": {
+        "notionApi": {
+          "id": "pU13RPGwe3ODBuFv",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "call this tool to create a contact",
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "1aa75af7-247e-8009-8e0e-ea1bb0905d2e",
+          "mode": "list",
+          "cachedResultName": "Vid CRM",
+          "cachedResultUrl": "https://www.notion.so/1aa75af7247e80098e0eea1bb0905d2e"
+        },
+        "title": "={{ $fromAI(\"contactName\") }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Email|email",
+              "emailValue": "={{ $fromAI(\"emailOfContact\") }}"
+            },
+            {
+              "key": "Notes|rich_text",
+              "textContent": "={{ $fromAI(\"notesForContact\") }}"
+            },
+            {
+              "key": "Phone|phone_number",
+              "phoneValue": "={{ $fromAI(\"phoneNumberOfContact\") }}"
+            },
+            {
+              "key": "Website|url",
+              "urlValue": "={{ $fromAI(\"websiteForContact\") }}"
+            },
+            {
+              "key": "Lead Status|status",
+              "statusValue": "={{ $fromAI(\"statusOfLead\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notionTool",
+      "typeVersion": 2.2,
+      "position": [
+        380,
+        760
+      ],
+      "id": "dcc39934-e3db-49a9-8990-ad5c9ad89608",
+      "name": "Create Contact",
+      "credentials": {
+        "notionApi": {
+          "id": "pU13RPGwe3ODBuFv",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "call this  tool to update a contact ",
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $fromAI(\"pageIdOfContact\") }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Name|title",
+              "title": "={{ $fromAI(\"updatedContactName\") }}"
+            },
+            {
+              "key": "Notes|rich_text",
+              "textContent": "={{ $fromAI(\"updatedContactNotes\") }}"
+            },
+            {
+              "key": "Phone|phone_number",
+              "phoneValue": "={{ $fromAI(\"updatedContactPhone\") }}"
+            },
+            {
+              "key": "Website|url",
+              "urlValue": "={{ $fromAI(\"updatedContactWebsite\") }}"
+            },
+            {
+              "key": "Lead Status|status",
+              "statusValue": "={{ $fromAI(\"updatedLeadStatus\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notionTool",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        760
+      ],
+      "id": "4e01c8b2-af99-43c9-86db-331cbd544b2b",
+      "name": "Update Contact",
+      "credentials": {
+        "notionApi": {
+          "id": "pU13RPGwe3ODBuFv",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Setup Guide\n- [ ] Create Notion database for CRM\n- [ ] Connect Notion to n8n\n- [ ] Edit AI Agent prompt (\"Text\" field) based on Notion database\n- [ ] Edit tools according to CRM",
+        "height": 220,
+        "width": 340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -20,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "6895f479-4330-4cae-a43f-54031e71b949",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are to execute the following task:\n{{ $json.taskForExecution }}\n\n\nYou have access to the following tools:\n- get contact(s)\n- create a contact, fill in empty fields with a space \" \"\n- update a contact\n\nEach contact has the following information:\n- Name\n- Lead Status, which has the following statuses\n  - Not Contacted\n  - Cold\n  - Warm\n  - Interested\n  - Closed\n- Phone\n- Email\n- Website\n- Notes\n\n\nYou must always fill in a status, so choose based on what you think is the best fit, and if not set to \"Not Contacted\".",
+        "options": {
+          "systemMessage": "You are an assistant in charge of helping me manage my CRM. You can create new contacts, update current ones, and find contacts that already exist."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        20,
+        540
+      ],
+      "id": "da6f10d2-e7a3-4657-8c36-17bbdb34ca6d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "taskForExecution"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -200,
+        540
+      ],
+      "id": "3feb0036-d963-41e2-89a6-022cd38ed2c7",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Contact": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6b3ce34b-068f-4f2a-b276-6d8a0477480b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "16629a77b4219fe54201636e06c0d2eb72b1bdad86870b51670c815092d7bb05"
+  },
+  "id": "QTtHFkQGKctmHk1T",
+  "tags": [
+    {
+      "createdAt": "2025-02-24T17:35:44.682Z",
+      "updatedAt": "2025-02-24T17:35:44.682Z",
+      "id": "vDzcYSu6gK4AiaFh",
+      "name": "In Progress"
+    }
+  ]
+}

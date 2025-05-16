@@ -1,0 +1,506 @@
+{
+  "name": "***Content - Instagram Agent***",
+  "nodes": [
+    {
+      "parameters": {
+        "resume": "webhook",
+        "options": {
+          "responseData": "Your post has been approved!"
+        }
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        760,
+        300
+      ],
+      "id": "0c296f3c-6998-4622-a05b-f7aaf478f185",
+      "name": "Wait",
+      "webhookId": "e2cdd418-64f0-4d2d-bb38-09c31bbe8461"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ac4810d5-b395-4a1f-987d-d59bf25725ec",
+              "leftValue": "={{ $json.query.answer }}",
+              "rightValue": "post",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        300
+      ],
+      "id": "45fffac6-1e07-4f46-bdb1-256de99c45f5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.telegramChatId }}",
+        "text": "=Your post is:\n{{ $('AI Agent').item.json.output }}\n\n\nPlease tap [Post]({{ $execution.resumeUrl }}?answer=post) or [Do not Post]({{ $execution.resumeUrl }}?answer=no).",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        540,
+        300
+      ],
+      "id": "4db0efa8-42b6-4407-a15a-500a6c227454",
+      "name": "Telegram",
+      "webhookId": "13a31340-47a8-4b19-b852-c8a1b20ba417",
+      "credentials": {
+        "telegramApi": {
+          "id": "QT1TafR4xHGlKkkF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=1"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -220,
+        520
+      ],
+      "id": "6d0f49b3-94e1-479e-be98-47a1cf6278e6",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Make an Instagram post about the following topic. Only respond with the post, as I am running an automation on your response.\n\nYour response should be formatted for Instagram including new lines, text and emojis. Never include links in your responses (ie post captions).\n\nTopic: {{ $json.instaPostTopic }}",
+        "options": {
+          "systemMessage": "You are a social media marketing expert for me who runs a __ENTER INDUSTRY / CONTENT TOPIC___. You are to create Instagram posts for my business page. Ensure your responses (ie posts) are not too long and make sure it is formatted appropriately with lines as spacing between main points.\n\nMake sure to never include a link in the post caption. Instead tell the user to go to the link in my bio to go to my YouTube channel."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -320,
+        300
+      ],
+      "id": "b330b3c3-3dfa-406f-a142-4e03818010ee",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -380,
+        520
+      ],
+      "id": "b25aef43-5352-44e4-a871-56b85388771b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v21.0",
+        "node": "INSERT Instagram ID",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "={{ $('OpenAI').item.json.url }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('AI Agent').item.json.output }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        180
+      ],
+      "id": "92d4c7da-d6d3-4689-adae-71238a61a713",
+      "name": "Facebook Graph API",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "6rX80MSttvX7bkDp",
+          "name": "Facebook Graph account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v21.0",
+        "node": "INSERT Instagram ID",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "name": "image_url",
+                "value": "={{ $('OpenAI').item.json.url }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('AI Agent').item.json.output }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        180
+      ],
+      "id": "7ff9311f-70e3-4ace-8420-b318fdc5374d",
+      "name": "Facebook Graph API1",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "6rX80MSttvX7bkDp",
+          "name": "Facebook Graph account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Create Media",
+        "height": 200,
+        "width": 180,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        140
+      ],
+      "typeVersion": 1,
+      "id": "dde02b7e-a2a8-40f8-bd0c-a0521b04aabe",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### Publish Media",
+        "height": 200,
+        "width": 180,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1420,
+        140
+      ],
+      "typeVersion": 1,
+      "id": "2163b1a5-2149-4988-906d-ff0c03497dd5",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "=Capture a high-quality, genuine photograph for a business Instagram page that looks like it was taken on an iPhone by a real photographer. The image should feature natural lighting, authentic details, and a candid composition that makes it indistinguishable from a real, unedited snapshot. This photograph should be related to the post caption below.\n\nThe post is as follows:\n{{ $json.output }}",
+        "options": {
+          "quality": "standard",
+          "size": "1024x1024",
+          "style": "natural",
+          "returnImageUrls": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        60,
+        300
+      ],
+      "id": "5d210452-272e-4e6f-a691-1ef713780df0",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.telegramChatId }}",
+        "file": "={{ $json.url }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        300
+      ],
+      "id": "cbab71b2-b20e-40a9-bc33-2a8ca872b989",
+      "name": "Telegram1",
+      "webhookId": "a3d063f7-856e-45e3-af82-b6f1a1bbfa01",
+      "credentials": {
+        "telegramApi": {
+          "id": "QT1TafR4xHGlKkkF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Send Image",
+        "height": 200,
+        "width": 180,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        260,
+        260
+      ],
+      "typeVersion": 1,
+      "id": "66455996-637e-42d1-87e6-2b80d07cda93",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "### Send Caption",
+        "height": 200,
+        "width": 180,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        500,
+        260
+      ],
+      "typeVersion": 1,
+      "id": "ef827919-02c8-45d0-9bac-8daccf51e0ea",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "instaPostTopic"
+            },
+            {
+              "name": "telegramChatId"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -520,
+        300
+      ],
+      "id": "a9176576-00a8-42e7-a70e-208a3403ec7c",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "content": "### Setup Guide\n- [ ] Adjust AI Agent prompt\n- [ ] Adjust image gen. prompt\n- [ ] Connect OpenAI\n- [ ] Connect Telegram account\n- [ ] Create a Facebook app\n- [ ] Add permissions\n- [ ] Connect to n8n",
+        "height": 220,
+        "width": 280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -260,
+        -20
+      ],
+      "typeVersion": 1,
+      "id": "61f25b1a-d838-4a03-adc4-a3d58d87dd1c",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "### Facebook App Permissions\n**Instagram**\n* Instagram_basic\n* instagram_content_publish\n\n**Facebook**\n* pages_show_list\n* business_management\n* pages_read_engagement\n* pages_manage_posts",
+        "height": 260,
+        "width": 300
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        120,
+        -40
+      ],
+      "typeVersion": 1,
+      "id": "9f9e8f80-49cc-461d-986d-23ad9aa5e129",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram1": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f66b43fd-61b6-4dc0-bf9b-a5ba284bd75f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "16629a77b4219fe54201636e06c0d2eb72b1bdad86870b51670c815092d7bb05"
+  },
+  "id": "VBqPFv6WIBzmBjPn",
+  "tags": [
+    {
+      "createdAt": "2025-02-24T17:35:26.191Z",
+      "updatedAt": "2025-02-24T17:36:01.451Z",
+      "id": "YmkIGZIuf6UXSIaV",
+      "name": "Content Agent"
+    }
+  ]
+}

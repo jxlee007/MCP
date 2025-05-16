@@ -1,0 +1,122 @@
+{
+  "name": "Tavily - Web Search API TEMPLATE",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "searchPrompt"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "931747e6-acfe-40d6-bd30-d766f1bb5b9d",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"api_key\": \"______ENTER_API_KEY______\",\n  \"query\": \"{{ $json.searchPrompt }}\",\n  \"search_depth\": \"basic\",\n  \"include_answer\": true,\n  \"topic\": \"general\",\n  \"include_raw_content\": true,\n  \"max_results\": 2\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "946dfd1b-df78-45de-97da-42bd7bc2454e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "81b081a3-d202-4a8d-80dc-aaa1eb18d9a3",
+              "name": "Response",
+              "value": "=Source 1: {{ $json.results[0].title }}\n- URL: {{ $json.results[0].url }}\n- Content: {{ $json.results[0].content }}\n\n\nSource 2: {{ $json.results[1].title }}\n- URL: {{ $json.results[1].url }}\n- Content: {{ $json.results[1].content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        0
+      ],
+      "id": "e361b64c-6111-4875-874c-9c6f49d9de59",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "### Setup Guide\n**Create an account on [Tavily](https://tavily.com/)**\n\nI will be posting a video about setting this up later but feel free to explore this tool!\n\n- [ ] fill in API key inside of HTTP Request node",
+        "height": 220,
+        "width": 360
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        140,
+        -300
+      ],
+      "typeVersion": 1,
+      "id": "f878e808-0555-4a6d-9bd2-3bd99fd55446",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1c013f98-b5af-4f09-9c14-f69c555a40ed",
+  "meta": {
+    "instanceId": "16629a77b4219fe54201636e06c0d2eb72b1bdad86870b51670c815092d7bb05"
+  },
+  "id": "RVfeKokyjbdT5kQp",
+  "tags": [
+    {
+      "createdAt": "2025-02-25T04:48:06.360Z",
+      "updatedAt": "2025-02-25T04:48:06.360Z",
+      "id": "yukdQZDm5Z938AYa",
+      "name": "Tool"
+    }
+  ]
+}

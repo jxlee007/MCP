@@ -1,0 +1,642 @@
+{
+  "name": "Inventory Management",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e7db067d-da15-439e-aec5-75519a87f78c",
+      "name": "Telegram Trigger",
+      "webhookId": "89bf0814-cfda-47e3-afa2-920cbfd91a96",
+      "credentials": {
+        "telegramApi": {
+          "id": "QT1TafR4xHGlKkkF",
+          "name": "Telegram account - Personal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are in charage of managing inventory for a company. You have access to two different spreadsheets.\n\nHelp with the following: {{ $json.message.text }}\n\nSheet 1: holds the locations where the inventory is stored and has some information about which the products at that location.\n\nSheet 2: is the master data sheet which holds more specific information about all of the products used by this company. (This should be used as a reference)\n\n\nYou have access to the following tools...\nSheet 1 Tools:\n- get inventory row(s): gets a piece of inventory from the first sheet which holds the locations\n- create a row for an inventory entry: adds inventory (should not be used a lot)\n- update an inventory entry / row: updates the inventory at a location\n\nSheet 2 Tools:\n- get information about an inventory item from master data sheet: use this to reference when updating sheet 1\n\nGeneral Tools:\n- calculator: use this for all calculations to ensure accuracy\n\n\n\n\n\nYou have access to the following variables:\nToday's date: {{ $now }}",
+        "options": {
+          "systemMessage": "You are in charge of managing inventory for a small business, you will be give adjustments to physical inventory and you should update the inventory spreadsheet based on those changes."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        0
+      ],
+      "id": "36ea093f-419d-4a12-ac77-75aa95fc05f3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "create a row for an inventory entry",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8",
+          "mode": "list",
+          "cachedResultName": "Inventory Management Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 206532206,
+          "mode": "list",
+          "cachedResultName": "Current",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8/edit#gid=206532206"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "SKU": "={{ $fromAI(\"SKU\") }}",
+            "Product Name": "={{ $fromAI(\"ProductName\") }}",
+            "Quantity": "={{ $fromAI(\"ProductQuantity\") }}",
+            "Reorder Date": "={{ $fromAI(\"ReorderDate\") }}",
+            "Location": "={{ $fromAI(\"Location\") }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Product Name",
+              "displayName": "Product Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SKU",
+              "displayName": "SKU",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Quantity",
+              "displayName": "Quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reorder Date",
+              "displayName": "Reorder Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        300,
+        300
+      ],
+      "id": "feca35cc-6ace-49b6-a93d-87ab90f53248",
+      "name": "Create",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mHP3pDVwrOTJg66g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "get inventory row(s)",
+        "documentId": {
+          "__rl": true,
+          "value": "1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8",
+          "mode": "list",
+          "cachedResultName": "Inventory Management Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 206532206,
+          "mode": "list",
+          "cachedResultName": "Current",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8/edit#gid=206532206"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Location",
+              "lookupValue": "={{ $fromAI(\"Location\") }}"
+            },
+            {
+              "lookupColumn": "Product Name",
+              "lookupValue": "={{ $fromAI(\"ProductName\") }}"
+            },
+            {
+              "lookupColumn": "SKU",
+              "lookupValue": "={{ $fromAI(\"SKU\") }}"
+            },
+            {
+              "lookupColumn": "Quantity",
+              "lookupValue": "={{ $fromAI(\"Quantity\") }}"
+            },
+            {
+              "lookupColumn": "Reorder Date",
+              "lookupValue": "={{ $fromAI(\"ReorderDate\") }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        400,
+        300
+      ],
+      "id": "72e45d6c-f433-4150-aa83-68a7f8038638",
+      "name": "Get",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mHP3pDVwrOTJg66g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "update an inventory entry / row",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8",
+          "mode": "list",
+          "cachedResultName": "Inventory Management Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 206532206,
+          "mode": "list",
+          "cachedResultName": "Current",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8/edit#gid=206532206"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Location": "={{ $fromAI(\"Location\") }}",
+            "Product Name": "={{ $fromAI(\"ProductName\") }}",
+            "SKU": "={{ $fromAI(\"SKU\") }}",
+            "Quantity": "={{ $fromAI(\"Quantity\") }}",
+            "Reorder Date": "={{ $fromAI(\"ReorderDate\") }}"
+          },
+          "matchingColumns": [
+            "Location"
+          ],
+          "schema": [
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Product Name",
+              "displayName": "Product Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SKU",
+              "displayName": "SKU",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Quantity",
+              "displayName": "Quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reorder Date",
+              "displayName": "Reorder Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        500,
+        300
+      ],
+      "id": "7e9cdb2e-0898-463e-b895-02d3708ffb95",
+      "name": "Update",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mHP3pDVwrOTJg66g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        140,
+        300
+      ],
+      "id": "0281e4e5-296a-43aa-8b06-27e57d16709c",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -20,
+        300
+      ],
+      "id": "792ea66c-15e9-480a-bb64-d2db7cbc7048",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DavIMt1PnUQ9Imnh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ],
+      "id": "b56eeddb-f09b-48e4-a2de-5898037929b8",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "content": "### Overview\n* Updates inventory and gets current inventory\n* Uses the two sheets to fill in and calculate needed information for you!\n\n\n**First Sheet**\n* Inventory locations\n\n\n**Second Sheet**\n* Info. sheet that holds all prices & SKU's",
+        "height": 280,
+        "width": 320,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        180,
+        -340
+      ],
+      "typeVersion": 1,
+      "id": "67139b17-dd31-4a80-9aa1-91810e8f0ce5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "get information about an inventory item from master data sheet",
+        "documentId": {
+          "__rl": true,
+          "value": "1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8",
+          "mode": "list",
+          "cachedResultName": "Inventory Management Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Master Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v5xjLEMhOmhyJ0msedlnGzR3B8eC3XP4g7N5EUTEPc8/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "SKU",
+              "lookupValue": "={{ $fromAI(\"SKU\") }}"
+            },
+            {
+              "lookupColumn": "Product Name",
+              "lookupValue": "={{ $fromAI(\"ProductName\") }}"
+            },
+            {
+              "lookupColumn": "Category",
+              "lookupValue": "={{ $fromAI(\"ProductCategory\") }}"
+            },
+            {
+              "lookupColumn": "Reorder Point",
+              "lookupValue": "={{ $fromAI(\"ReorderPoint\") }}"
+            },
+            {
+              "lookupColumn": "Lead Time (Days)",
+              "lookupValue": "={{ $fromAI(\"ReorderLeadTime\") }}"
+            },
+            {
+              "lookupColumn": "Min Stock",
+              "lookupValue": "={{ $fromAI(\"MinimumStock\") }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        800,
+        300
+      ],
+      "id": "bba40fef-4dba-4c17-9f38-fc7c64fb6113",
+      "name": "Get Item Info",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mHP3pDVwrOTJg66g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        580,
+        0
+      ],
+      "id": "8653635f-5e9b-4b3f-8230-0f3afe25592e",
+      "name": "Telegram",
+      "webhookId": "9634eee6-133e-40da-97d6-088141c90b11",
+      "credentials": {
+        "telegramApi": {
+          "id": "QT1TafR4xHGlKkkF",
+          "name": "Telegram account - Personal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Setup Guide\n- [ ] Create Telegram account\n- [ ] Create Telegram bot\n- [ ] Connect Telegram to n8n via API key\n- [ ] Connect OpenAI API\n- [ ] Connect Google Sheets via login\n- [ ] Edit the 4 Google Sheet tools to reflect your inventory spreadsheet",
+        "height": 240,
+        "width": 340
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        540,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "6dcf8348-81fe-40d3-9169-a1c96ecb7c4a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## NOTICE\n**If your Google Sheet connection look like this don't worry!**\n![](https://community.n8n.io/uploads/default/original/3X/f/b/fb1812078112759d278b3c554893a49dc861c070.png)\n**If this is the case...**\n\nSelect \"[Open docs](https://docs.n8n.io/integrations/builtin/credentials/google/oauth-single-service/?utm_source=n8n_app&utm_medium=credential_settings&utm_campaign=create_new_credentials_modal#set-up-oauth)\" and follow the instructions on n8n's documentation\n\n*This will walk you through creating a Google Cloud project*",
+        "height": 500,
+        "width": 440,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        260,
+        500
+      ],
+      "typeVersion": 1,
+      "id": "7e7fc801-63ac-428d-88a7-0e472b5eafd5",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "### First Sheet",
+        "height": 140,
+        "width": 320,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        280,
+        260
+      ],
+      "typeVersion": 1,
+      "id": "150e735b-eb38-4c96-999e-00170b19855c",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "### Second Sheet",
+        "height": 140,
+        "width": 160,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        760,
+        260
+      ],
+      "typeVersion": 1,
+      "id": "62fe4e71-b147-4d1b-8334-df1b9f25b0f7",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Item Info": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "32a0e92c-a07f-4d3e-b26c-b3cb0b7448dc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "16629a77b4219fe54201636e06c0d2eb72b1bdad86870b51670c815092d7bb05"
+  },
+  "id": "maKvAz43fGvqzgN0",
+  "tags": []
+}
